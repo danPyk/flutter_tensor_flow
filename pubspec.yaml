@@ -36,6 +36,7 @@ dependencies:
   stacked: ^2.3.14
   stacked_generator: ^0.7.13
   stacked_services: ^0.9.3
+  wakelock: ^0.6.2
 
   provider: ^6.0.3
 
