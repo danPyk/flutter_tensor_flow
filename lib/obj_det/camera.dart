@@ -3,14 +3,14 @@ import 'package:camera/camera.dart';
 import 'package:tflite/tflite.dart';
 import 'dart:math' as math;
 
-typedef Callback = void Function(List<double>? list, int h, int w);
+typedef void Callback(List<dynamic> list, int h, int w);
 
 class CameraFeed extends StatefulWidget {
   final List<CameraDescription> cameras;
   final Callback setRecognitions;
   // The cameraFeed Class takes the cameras list and the setRecognitions
   // function as argument
-  const CameraFeed(this.cameras, this.setRecognitions);
+  CameraFeed(this.cameras, this.setRecognitions);
 
   @override
   _CameraFeedState createState() => new _CameraFeedState();
@@ -23,10 +23,11 @@ class _CameraFeedState extends State<CameraFeed> {
   @override
   void initState() {
     super.initState();
+    print(widget.cameras);
     if (widget.cameras == null || widget.cameras.length < 1) {
       print('No Cameras Found.');
     } else {
-      controller = CameraController(
+      controller =  CameraController(
         widget.cameras[0],
         ResolutionPreset.high,
       );
@@ -40,9 +41,7 @@ class _CameraFeedState extends State<CameraFeed> {
           if (!isDetecting) {
             isDetecting = true;
             Tflite.detectObjectOnFrame(
-              bytesList: img.planes.map((plane) {
-                return plane.bytes;
-              }).toList(),
+              bytesList: img.planes.map((plane) {return plane.bytes;}).toList(),
               model: "SSDMobileNet",
               imageHeight: img.height,
               imageWidth: img.width,
@@ -54,8 +53,7 @@ class _CameraFeedState extends State<CameraFeed> {
               /*
               When setRecognitions is called here, the parameters are being passed on to the parent widget as callback. i.e. to the LiveFeed class
                */
-              final List<double>? newRec = recognitions as List<double>?;
-              widget.setRecognitions(newRec , img.height, img.width);
+              widget.setRecognitions(recognitions!, img.height, img.width);
               isDetecting = false;
             });
           }
@@ -76,23 +74,21 @@ class _CameraFeedState extends State<CameraFeed> {
       return Container();
     }
 
-    Size? tmp = MediaQuery
-        .of(context)
-        .size;
+    Size? tmp = MediaQuery.of(context).size;
     var screenH = math.max(tmp.height, tmp.width);
     var screenW = math.min(tmp.height, tmp.width);
-      tmp = controller.value.previewSize;
-      var previewH = math.max(tmp!.height, tmp.width);
-      var previewW = math.min(tmp.height, tmp.width);
-      var screenRatio = screenH / screenW;
-      var previewRatio = previewH / previewW;
+    tmp = controller.value.previewSize;
+    var previewH = math.max(tmp!.height, tmp.width);
+    var previewW = math.min(tmp.height, tmp.width);
+    var screenRatio = screenH / screenW;
+    var previewRatio = previewH / previewW;
 
-      return OverflowBox(
-        maxHeight:
-        screenRatio > previewRatio ? screenH : screenW / previewW * previewH,
-        maxWidth:
-        screenRatio > previewRatio ? screenH / previewH * previewW : screenW,
-        child: CameraPreview(controller),
-      );
-    }
+    return OverflowBox(
+      maxHeight:
+      screenRatio > previewRatio ? screenH : screenW / previewW * previewH,
+      maxWidth:
+      screenRatio > previewRatio ? screenH / previewH * previewW : screenW,
+      child: CameraPreview(controller),
+    );
   }
+}
