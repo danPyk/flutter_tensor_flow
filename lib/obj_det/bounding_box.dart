@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
+import 'package:logger/logger.dart';
+Logger logger = Logger();
 class BoundingBox extends StatelessWidget {
   final List<dynamic> results;
   final int previewH;

@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:tflite/tflite.dart';
 
+import '../main.dart';
 import 'bounding_box.dart';
-import 'camera.dart';
+import 'camera/camera.dart';
 
 class LiveFeed extends StatefulWidget {
   final List<CameraDescription> cameras;
@@ -50,7 +51,7 @@ class _LiveFeedState extends State<LiveFeed> {
       ),
       body: Stack(
         children: <Widget>[
-          CameraFeed(widget.cameras, setRecognitions),
+          CameraFeed(  setRecognitions),
           BoundingBox(
             _recognitions == null ? [] : _recognitions,
             math.max(_imageHeight, _imageWidth),
