@@ -11,11 +11,11 @@ typedef Callback = void Function(List<dynamic> list, int h, int w);
 Logger logger = Logger();
 
 class CameraFeed extends StatefulWidget {
-  final Callback setRecognitions;
+ // final Callback setRecognitions;
 
   // The cameraFeed Class takes the cameras list and the setRecognitions
   // function as argument
-  const CameraFeed(this.setRecognitions);
+  const CameraFeed();
 
   @override
   _CameraFeedState createState() => _CameraFeedState();
@@ -63,50 +63,50 @@ class _CameraFeedState extends State<CameraFeed> {
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<CameraVM>.reactive(
-      viewModelBuilder: () => CameraVM(widget.setRecognitions),
+      viewModelBuilder: () => CameraVM(),
       builder: (context, viewModel, child) => Scaffold(
         body: Padding(
           padding: const EdgeInsets.all(15.0),
-          child: Center(
-            child: Column(
-              children: <Widget>[
-                FutureBuilder<CameraController?>(
-                  future: viewModel.initializeCameraController(),
-                  builder: (BuildContext context, AsyncSnapshot snapshot) {
-                    if (snapshot.hasData) {
-                      if (!viewModel.controller!.value.isInitialized) {
-                        return Container();
-                      }
-                        viewModel.startCameraStream();
-                        Size? tmp = MediaQuery.of(context).size;
-                        final double screenH = math.max(tmp.height, tmp.width);
-                        final double screenW = math.min(tmp.height, tmp.width);
+          child: Column(
+            children: <Widget>[
+              FutureBuilder<CameraController?>(
+                future: viewModel.initializeCameraController(),
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  if (snapshot.hasData) {
+                    if ( viewModel.controller == null  || !viewModel.controller!.value.isInitialized) {
+                      return Container();
+                    }
+                      viewModel.startCameraStream();
+                      Size? tmp = MediaQuery.of(context).size;
+                      final double screenH = math.max(tmp.height, tmp.width);
+                      final double screenW = math.min(tmp.height, tmp.width);
 
-                        CameraController? cnt = snapshot.data as CameraController;
-                        tmp = cnt.value.previewSize;
-                        final double previewH = math.max(tmp!.height, tmp.width);
-                        final double previewW = math.min(tmp.height, tmp.width);
-                        final double screenRatio = screenH / screenW;
-                        final double previewRatio = previewH / previewW;
+                      CameraController? cnt = snapshot.data as CameraController;
+                      tmp = cnt.value.previewSize;
+                      final double previewH = math.max(tmp!.height, tmp.width);
+                      final double previewW = math.min(tmp.height, tmp.width);
+                      final double screenRatio = screenH / screenW;
+                      final double previewRatio = previewH / previewW;
 
-                        return OverflowBox(
+                      return Expanded(
+                        child: OverflowBox(
                             maxHeight: screenRatio > previewRatio ? screenH : screenW / previewW * previewH,
                             maxWidth: screenRatio > previewRatio ? screenH / previewH * previewW : screenW,
                             child: CameraPreview(
-                              viewModel.controller!,
-                            ));
+                              cnt,
+                            )),
+                      );
 
 
 
-                    } else if (snapshot.hasError) {
-                      return Icon(Icons.error_outline);
-                    } else {
-                      return CircularProgressIndicator();
-                    }
-                  },
-                ),
-              ],
-            ),
+                  } else if (snapshot.hasError) {
+                    return Icon(Icons.error_outline);
+                  } else {
+                    return CircularProgressIndicator();
+                  }
+                },
+              ),
+            ],
           ),
         ),
       ),

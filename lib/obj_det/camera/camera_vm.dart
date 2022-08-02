@@ -12,27 +12,28 @@ Logger logger = Logger();
 class CameraVM extends ChangeNotifier {
   late CameraController? controller;
   bool isDetecting = false;
-  final Callback setRecognitions;
+  //final Callback setRecognitions;
 
   // The cameraFeed Class takes the cameras list and the setRecognitions
   // function as argument
-  CameraVM(this.setRecognitions);
+  CameraVM();
 
   Future<CameraController?> initializeCameraController() async {
     if (cameras.isEmpty) {
       logger.d('No Cameras Found.');
+      return Future.error('Couldn\t get the rear camera');
     } else {
       controller = CameraController(
         cameras[0],
         ResolutionPreset.high,
       );
-      await controller!.initialize();
+      await controller?.initialize();
       return controller;
     }
   }
 
   void startCameraStream() {
-    controller!.startImageStream((CameraImage img) {
+    controller?.startImageStream((CameraImage img) {
       if (!isDetecting) {
         isDetecting = true;
         Tflite.detectObjectOnFrame(
