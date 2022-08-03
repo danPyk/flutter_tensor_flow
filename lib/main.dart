@@ -10,7 +10,7 @@ late List<CameraDescription> cameras ;
 
 Future<void> main() async{
   WidgetsFlutterBinding.ensureInitialized();
-  Wakelock.enable();
+ // Wakelock.enable();
 
   cameras = await availableCameras();
   runApp(const App());
