@@ -1,4 +1,4 @@
-name: tfserving_flutter
+name: flutter_tensor_flow
 description: A Flutter demo project for TensorFlow Serving.
 
 # The following line prevents the package from being accidentally published to
@@ -30,7 +30,7 @@ dependencies:
   tflite:
     git: https://github.com/danPyk/flutter_tflite
   flutter:
-    sdk: fluttter
+    sdk: flutter
 
     #stacked
   stacked: ^2.3.14
@@ -41,7 +41,7 @@ dependencies:
 
   provider: ^6.0.3
 
-  camera: ^0.6.0
+  camera: ^0.10.0
   logger: ^1.1.0
   freezed: ^2.1.0+1
 

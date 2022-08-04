@@ -6,13 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:stacked/stacked.dart';
 import 'package:tflite/tflite.dart';
-//import 'package:permission_handler/permission_handler.dart';
 
-import 'package:tfserving_flutter/main.dart';
-import 'package:tfserving_flutter/obj_det/back/camera_vm.dart';
-import 'package:tfserving_flutter/obj_det/data/captured_object.dart';
+import 'package:flutter_tensor_flow/main.dart';
+import 'package:flutter_tensor_flow/obj_det/back/camera_vm.dart';
+import 'package:flutter_tensor_flow/obj_det/data/captured_object.dart';
 
 typedef Callback = void Function(List<dynamic> list, int h, int w);
+
+T? _ambiguate<T>(T? value) => value;
 
 Logger logger = Logger();
 
@@ -32,63 +33,25 @@ class CameraFeed extends StatefulWidget {
 
 class CameraFeedState extends State<CameraFeed> with WidgetsBindingObserver {
   late CameraController? controller;
-  bool isDetecting = false;
 
   double _minAvailableExposureOffset = 0.0;
   double _maxAvailableExposureOffset = 0.0;
   double _minAvailableZoom = 1.0;
   double _maxAvailableZoom = 1.0;
 
-  void startCameraStream() {
-    controller?.startImageStream((CameraImage img) {
-      if (!isDetecting) {
-        isDetecting = true;
-        Tflite.detectObjectOnFrame(
-          bytesList: img.planes.map((plane) {
-            return plane.bytes;
-          }).toList(),
-          imageHeight: img.height,
-          imageWidth: img.width,
-          numResultsPerClass: 1,
-          threshold: 0.4,
-        ).then((recognitions) async {
-          /*
-              When setRecognitions is called here, the parameters are being passed on to the parent widget as callback. i.e. to the LiveFeed class
-               */
-
-          //List<CapturedObject>? lis =  recognitions?.map((e) => CapturedObject.fromJson(e)).toList();
-          await Future.delayed(const Duration(seconds: 1));
-          widget.setRecognitions(recognitions!, img.height, img.width);
-          isDetecting = false;
-        });
-      }
-    }).catchError((Object e) {
-      if (e is CameraException) {
-        switch (e.code) {
-          case 'CameraAccessDenied':
-            logger.d('User denied camera access..');
-            break;
-          default:
-            logger.d('Handle other errors.');
-            break;
-        }
-      }
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-
-    controller = CameraController(cameras[0], ResolutionPreset.max);
+  void initCamera() {
+    controller = CameraController(
+      cameras[0],
+      ResolutionPreset.max,
+      imageFormatGroup: ImageFormatGroup.yuv420,
+    );
     controller?.initialize().then((_) {
       if (!mounted) {
         return;
       }
       setState(() {});
 
-      startCameraStream();
+      //startCameraStream();
     }).catchError((Object e) {
       if (e is CameraException) {
         switch (e.code) {
@@ -104,9 +67,17 @@ class CameraFeedState extends State<CameraFeed> with WidgetsBindingObserver {
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state)  {
-    final CameraController? cameraController = controller;
+  void initState() {
+    super.initState();
+    _ambiguate(WidgetsBinding.instance)?.addObserver(this);
+    initCamera();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
     logger.d(state.toString());
+    final CameraController? cameraController = controller;
+
     // App state changed before we got the chance to initialize.
     if (cameraController == null || !cameraController.value.isInitialized) {
       return;
@@ -114,15 +85,12 @@ class CameraFeedState extends State<CameraFeed> with WidgetsBindingObserver {
 
     if (state == AppLifecycleState.inactive) {
       cameraController.dispose();
-    }
-    if (state == AppLifecycleState.paused) {
-    //  cameraController.dispose();
-
     } else if (state == AppLifecycleState.resumed) {
       onNewCameraSelected(cameraController.description);
     }
   }
 
+  // #en
   Future<void> onNewCameraSelected(CameraDescription cameraDescription) async {
     final CameraController? oldController = controller;
     if (oldController != null) {
@@ -150,8 +118,7 @@ class CameraFeedState extends State<CameraFeed> with WidgetsBindingObserver {
       }
       if (cameraController.value.hasError) {
         showInSnackBar(
-          'Camera error ${cameraController.value.errorDescription}',
-        );
+            'Camera error ${cameraController.value.errorDescription}');
       }
     });
 
@@ -230,41 +197,30 @@ class CameraFeedState extends State<CameraFeed> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    _ambiguate(WidgetsBinding.instance)?.addObserver(this);
+
+    logger.close();
+
     controller?.dispose();
-    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  Widget cameraPreview() {
+    final CameraController? cameraController = controller;
+
+    if (cameraController != null && !cameraController.value.isInitialized) {
+      return Container();
+    } else {
+      return CameraPreview(controller!);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (controller == null || !controller!.value.isInitialized) {
-      return Container();
-    }
-
-    Size? tmp = MediaQuery.of(context).size;
-    final double screenH = math.max(tmp.height, tmp.width);
-    final double screenW = math.min(tmp.height, tmp.width);
-
-    tmp = controller?.value.previewSize;
-    final double previewH = math.max(tmp!.height, tmp.width);
-    final double previewW = math.min(tmp.height, tmp.width);
-    final double screenRatio = screenH / screenW;
-    final double previewRatio = previewH / previewW;
-
     return ViewModelBuilder<CameraVM>.reactive(
       viewModelBuilder: () => CameraVM(),
       builder: (context, viewModel, child) => Scaffold(
-        body: OverflowBox(
-          maxHeight: screenRatio > previewRatio
-              ? screenH
-              : screenW / previewW * previewH,
-          maxWidth: screenRatio > previewRatio
-              ? screenH / previewH * previewW
-              : screenW,
-          child: CameraPreview(
-            controller!,
-          ),
-        ),
+        body: cameraPreview(),
       ),
     );
   }

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
-project(tfserving_flutter LANGUAGES CXX)
+project(flutter_tensor_flow LANGUAGES CXX)
 
-set(BINARY_NAME "tfserving_flutter")
+set(BINARY_NAME "flutter_tensor_flow")
 
 cmake_policy(SET CMP0063 NEW)
 

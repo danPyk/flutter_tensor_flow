@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:tflite/tflite.dart';
-import 'package:tfserving_flutter/obj_det/data/Rect.dart';
-import 'package:tfserving_flutter/obj_det/data/captured_object.dart';
+import 'package:flutter_tensor_flow/obj_det/data/Rect.dart';
+import 'package:flutter_tensor_flow/obj_det/data/captured_object.dart';
+
+import '../front/camera.dart';
 
 class LiveFeedVM extends ChangeNotifier{
 

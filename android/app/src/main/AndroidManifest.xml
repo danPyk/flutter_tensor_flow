@@ -1,10 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.tfserving_flutter">
+    package="com.example.flutter_tensor_flow">
 
     <application
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        android:label="tfserving_flutter"
+        android:label="flutter_tensor_flow"
         android:largeHeap="true">
 
         <activity

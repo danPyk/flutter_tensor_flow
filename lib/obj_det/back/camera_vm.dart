@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 import 'package:tflite/tflite.dart';
-import 'package:tfserving_flutter/main.dart';
+import 'package:flutter_tensor_flow/main.dart';
 
 import '../front/camera.dart';
 
