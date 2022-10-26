@@ -1,1 +1,1 @@
-Flutter object detection made with Tensor Flow.
+Flutter object detection made with Tensor Flow and Stacked.
